@@ -18,6 +18,7 @@
   .sub strong { color: #111; }
   .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
   .badge-ja { background: #d1f5dd; color: #0a5d22; }
+  .badge-vielleicht { background: #fef3c7; color: #92400e; }
   .badge-nein { background: #eee; color: #666; }
   .actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 24px 0; }
   .actions button { padding: 16px; border: 0; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; color: white; transition: opacity 0.1s; }
@@ -60,6 +61,10 @@
 {% if item.verdict == 'nein' and item.reason %}
 <div style="background:#fff4f4; border-left: 4px solid #c44; padding: 12px 16px; margin: 0 0 20px 0; border-radius: 4px; font-size: 14px;">
   <strong style="color:#a33;">Ablehnungsgrund:</strong> {{ item.reason }}
+</div>
+{% elif item.verdict == 'vielleicht' and item.reason %}
+<div style="background:#fffbeb; border-left: 4px solid #d97706; padding: 12px 16px; margin: 0 0 20px 0; border-radius: 4px; font-size: 14px;">
+  <strong style="color:#92400e;">Unsicher:</strong> {{ item.reason }}
 </div>
 {% endif %}
 

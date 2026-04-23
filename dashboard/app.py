@@ -18,7 +18,7 @@ app.mount("/images", StaticFiles(directory=PATHS["images"]), name="images")
 
 
 @app.get("/", response_class=HTMLResponse)
-def index(request: Request, show: str = "interesting"):
+def index(request: Request, show: str = "ja"):
     base_query = """
         SELECT
           i.id, i.title, i.brand, i.size, i.condition, i.color,
@@ -30,17 +30,29 @@ def index(request: Request, show: str = "interesting"):
         LEFT JOIN user_actions u ON u.item_id = i.id
     """
     with connect() as con:
+        counts = dict(
+            con.execute(
+                "SELECT verdict, COUNT(*) FROM classifications GROUP BY verdict"
+            ).fetchall()
+        )
         if show == "all":
             rows = con.execute(base_query + " ORDER BY i.fetched_at DESC").fetchall()
-        elif show == "rejected":
+        elif show == "nein":
             rows = con.execute(
                 base_query + " WHERE c.verdict = 'nein' ORDER BY i.fetched_at DESC"
+            ).fetchall()
+        elif show == "vielleicht":
+            rows = con.execute(
+                base_query
+                + " WHERE c.verdict = 'vielleicht' AND u.action IS NULL"
+                + " ORDER BY i.fetched_at DESC"
             ).fetchall()
         elif show == "decided":
             rows = con.execute(
                 base_query + " WHERE u.action IS NOT NULL ORDER BY u.decided_at DESC"
             ).fetchall()
         else:
+            show = "ja"
             rows = con.execute(
                 base_query
                 + " WHERE c.verdict = 'ja' AND u.action IS NULL"
@@ -49,7 +61,7 @@ def index(request: Request, show: str = "interesting"):
     items = [dict(r) for r in rows]
     return templates.TemplateResponse(
         "index.html",
-        {"request": request, "items": items, "show": show},
+        {"request": request, "items": items, "show": show, "counts": counts},
     )
 
 

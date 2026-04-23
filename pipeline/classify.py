@@ -31,13 +31,19 @@ def _system_prompt():
 def _parse_response(raw):
     cleaned = (raw or "").strip()
     lowered = cleaned.lower()
+    if lowered.startswith("vielleicht"):
+        after = cleaned[len("vielleicht"):]
+        reason = re.sub(r"^[\s:;,\-\.]+", "", after).strip()
+        return "vielleicht", reason
     if lowered.startswith("ja"):
-        return "ja", ""
+        after = cleaned[2:]
+        reason = re.sub(r"^[\s:;,\-\.]+", "", after).strip()
+        return "ja", reason
     if lowered.startswith("nein") or lowered.startswith("no"):
         after = cleaned[4:] if lowered.startswith("nein") else cleaned[2:]
         reason = re.sub(r"^[\s:;,\-\.]+", "", after).strip()
         return "nein", reason
-    return "nein", cleaned[:200]
+    return "vielleicht", cleaned[:200]
 
 
 def classify(user_message):

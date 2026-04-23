@@ -6,12 +6,11 @@ def _fmt_money(value, currency="EUR"):
 
 _FORMAT_INSTRUCTION = (
     "\n\n---\n"
-    "Antwortformat (pflicht):\n"
-    "Bei Zustimmung: antworte exakt das Wort 'ja' und nichts weiter.\n"
-    "Bei Ablehnung: antworte 'nein: <Grund in max 15 Woertern>'.\n"
-    "Der Grund soll die wichtigste Regel nennen, an der es scheitert "
-    "(z.B. 'Modellnummer nicht in Bildern', 'Versand 4,99 EUR ueber Limit', "
-    "'Risse in Beschreibung'). Keine Aufzaehlungen, keine Absaetze, nur ein Satz."
+    "Antwortformat (pflicht), genau eines der drei:\n"
+    "- 'ja' (allein, ohne Grund) wenn Zielmodell 501/512/705/578 eindeutig erwaehnt und kein Ausschlussgrund.\n"
+    "- 'vielleicht: <Grund in max 15 Woertern>' wenn kein Ausschluss aber Zielmodell nicht sicher.\n"
+    "- 'nein: <Grund in max 15 Woertern>' bei Defekt, Fake, falschem Produkt oder Versand > 6 EUR.\n"
+    "Der Grund soll die wichtigste Regel nennen. Keine Aufzaehlungen, keine Absaetze, nur ein Satz."
 )
 
 

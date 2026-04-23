@@ -33,8 +33,9 @@
 <body>
 <h1>Vinted Bot</h1>
 <nav>
-  <a href="/?show=interesting" class="{% if show == 'interesting' %}active{% endif %}">Interessant (offen)</a>
-  <a href="/?show=rejected" class="{% if show == 'rejected' %}active{% endif %}">Abgelehnt</a>
+  <a href="/?show=ja" class="{% if show == 'ja' %}active{% endif %}">Ja{% if counts.get('ja') %} <small>({{ counts['ja'] }})</small>{% endif %}</a>
+  <a href="/?show=vielleicht" class="{% if show == 'vielleicht' %}active{% endif %}">Vielleicht{% if counts.get('vielleicht') %} <small>({{ counts['vielleicht'] }})</small>{% endif %}</a>
+  <a href="/?show=nein" class="{% if show == 'nein' %}active{% endif %}">Abgelehnt{% if counts.get('nein') %} <small>({{ counts['nein'] }})</small>{% endif %}</a>
   <a href="/?show=all" class="{% if show == 'all' %}active{% endif %}">Alle</a>
   <a href="/?show=decided" class="{% if show == 'decided' %}active{% endif %}">Entschieden</a>
   <span class="count">{{ items|length }} Artikel</span>
@@ -55,7 +56,7 @@
       <div class="sub">
         {{ item.size or '?' }} &middot; {{ item.condition or '?' }}
       </div>
-      {% if item.verdict == 'nein' and item.reason %}
+      {% if item.reason and item.verdict in ('nein', 'vielleicht') %}
         <div class="sub reason">{{ item.reason }}</div>
       {% endif %}
       {% if item.action %}

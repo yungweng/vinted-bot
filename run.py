@@ -107,6 +107,8 @@ def main():
                 continue
             if verdict == "ja":
                 print(f"  -> ja")
+            elif verdict == "vielleicht":
+                print(f"  -> vielleicht: {reason or '(kein Grund)'}")
             else:
                 print(f"  -> nein: {reason or '(kein Grund)'}")
 
