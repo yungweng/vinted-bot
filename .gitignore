@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environments
+.env
+.env.local
+.venv/
+venv/
+
+# Projekt-Daten (Runtime)
+*.sqlite
+*.sqlite-journal
+*.sqlite-*
+images/
+.easyocr/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
