@@ -5,8 +5,8 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from config import PATHS
-from storage.db import connect
+from vinted_bot.config import PATHS
+from vinted_bot.storage.db import connect
 
 
 BASE = Path(__file__).parent
@@ -60,8 +60,9 @@ def index(request: Request, show: str = "ja"):
             ).fetchall()
     items = [dict(r) for r in rows]
     return templates.TemplateResponse(
+        request,
         "index.html",
-        {"request": request, "items": items, "show": show, "counts": counts},
+        {"items": items, "show": show, "counts": counts},
     )
 
 
@@ -83,9 +84,9 @@ def item_detail(request: Request, item_id: int):
             (item_id,),
         ).fetchall()
     return templates.TemplateResponse(
+        request,
         "item.html",
         {
-            "request": request,
             "item": dict(row) if row else None,
             "images": [dict(i) for i in images],
         },

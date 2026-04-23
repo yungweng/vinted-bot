@@ -1,6 +1,10 @@
 from pathlib import Path
 
+from platformdirs import user_data_dir
+
 ROOT = Path(__file__).parent
+DATA_DIR = Path(user_data_dir("vinted-bot", appauthor=False))
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # Baseline-URL: alle Filter die du in der Vinted-Weboberflaeche klickst, landen hier.
 # Die Query-Params werden automatisch in API-Parameter uebersetzt.
@@ -44,6 +48,6 @@ SCRAPER = {
 }
 
 PATHS = {
-    "db": str(ROOT / "vinted.sqlite"),
-    "images": str(ROOT / "images"),
+    "db": str(DATA_DIR / "vinted.sqlite"),
+    "images": str(DATA_DIR / "images"),
 }

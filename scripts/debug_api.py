@@ -1,15 +1,11 @@
 import json
-import sys
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from config import SCRAPER, SEARCH_OVERRIDES, SEARCH_URL
-from scraper.filters import build_search_params
-from scraper.html_scrape import extract_description, extract_shipping, shipping_debug
-from scraper.normalize import normalize_item
-from scraper.session import VintedSession
-from scraper.vinted_api import search_catalog
+from vinted_bot.config import SCRAPER, SEARCH_OVERRIDES, SEARCH_URL
+from vinted_bot.scraper.filters import build_search_params
+from vinted_bot.scraper.html_scrape import extract_description, extract_shipping, shipping_debug
+from vinted_bot.scraper.normalize import normalize_item
+from vinted_bot.scraper.session import VintedSession
+from vinted_bot.scraper.vinted_api import search_catalog
 
 
 def main():

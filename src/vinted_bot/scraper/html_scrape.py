@@ -2,7 +2,7 @@ import re
 
 from bs4 import BeautifulSoup
 
-from config import SCRAPER
+from vinted_bot.config import SCRAPER
 
 
 def fetch_item_page(session, item_url):

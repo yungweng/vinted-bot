@@ -1,7 +1,7 @@
 from curl_cffi import requests
 from bs4 import BeautifulSoup
 
-from config import SCRAPER
+from vinted_bot.config import SCRAPER
 
 
 class VintedSession:

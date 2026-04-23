@@ -2,7 +2,7 @@ from pathlib import Path
 
 from curl_cffi import requests as curl_requests
 
-from config import PATHS, SCRAPER
+from vinted_bot.config import PATHS, SCRAPER
 
 
 _ALLOWED_EXT = {"jpg", "jpeg", "png", "webp"}

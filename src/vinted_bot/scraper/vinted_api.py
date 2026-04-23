@@ -1,4 +1,4 @@
-from config import SCRAPER
+from vinted_bot.config import SCRAPER
 
 
 def search_catalog(session, params):

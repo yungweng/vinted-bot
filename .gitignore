@@ -20,6 +20,11 @@ venv/
 images/
 .easyocr/
 
+# Build-Artefakte
+dist/
+build/
+*.egg-info/
+
 # OS / Editor
 .DS_Store
 Thumbs.db

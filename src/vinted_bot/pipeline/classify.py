@@ -5,7 +5,7 @@ from pathlib import Path
 
 from openai import OpenAI
 
-from config import CLASSIFIER
+from vinted_bot.config import CLASSIFIER
 
 
 @lru_cache(maxsize=1)

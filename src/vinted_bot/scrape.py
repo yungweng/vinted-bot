@@ -3,7 +3,7 @@ import sys
 import time
 from pathlib import Path
 
-from config import (
+from vinted_bot.config import (
     CLASSIFIER,
     MAX_ITEMS_PER_RUN,
     PATHS,
@@ -11,16 +11,16 @@ from config import (
     SEARCH_OVERRIDES,
     SEARCH_URL,
 )
-from pipeline.classify import classify
-from pipeline.images import download_item_images
-from pipeline.ocr import ocr_images
-from pipeline.prompt_builder import build_user_message
-from scraper.filters import build_search_params
-from scraper.html_scrape import extract_description, extract_shipping, fetch_item_page
-from scraper.normalize import normalize_item
-from scraper.session import VintedSession
-from scraper.vinted_api import search_catalog
-from storage.db import connect, item_exists, save_item
+from vinted_bot.pipeline.classify import classify
+from vinted_bot.pipeline.images import download_item_images
+from vinted_bot.pipeline.ocr import ocr_images
+from vinted_bot.pipeline.prompt_builder import build_user_message
+from vinted_bot.scraper.filters import build_search_params
+from vinted_bot.scraper.html_scrape import extract_description, extract_shipping, fetch_item_page
+from vinted_bot.scraper.normalize import normalize_item
+from vinted_bot.scraper.session import VintedSession
+from vinted_bot.scraper.vinted_api import search_catalog
+from vinted_bot.storage.db import connect, item_exists, save_item
 
 
 def main():
@@ -124,7 +124,7 @@ def main():
     print(f"  neu klassifiziert: {processed}")
     print(f"  skipped (schon in db): {skipped}")
     print(f"  errors: {errors}")
-    print("\nStart the dashboard: uvicorn dashboard.app:app --reload")
+    print("\nStart the dashboard: vinted-bot")
 
 
 if __name__ == "__main__":

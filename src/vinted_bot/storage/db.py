@@ -2,7 +2,7 @@ import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 
-from config import PATHS
+from vinted_bot.config import PATHS
 
 
 _SCHEMA_PATH = Path(__file__).parent / "schema.sql"

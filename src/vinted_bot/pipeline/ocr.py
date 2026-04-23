@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from config import OCR, PATHS
+from vinted_bot.config import OCR, PATHS
 
 
 @lru_cache(maxsize=1)
