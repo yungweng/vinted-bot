@@ -24,6 +24,7 @@ images/
 dist/
 build/
 *.egg-info/
+uv.lock
 
 # OS / Editor
 .DS_Store
