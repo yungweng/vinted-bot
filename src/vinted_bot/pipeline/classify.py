@@ -1,31 +1,29 @@
-import os
 import re
-from functools import lru_cache
-from pathlib import Path
 
 from openai import OpenAI
 
 from vinted_bot.config import CLASSIFIER
 
 
-@lru_cache(maxsize=1)
-def _client():
-    return OpenAI(
-        base_url=CLASSIFIER["base_url"],
-        api_key=os.environ["OPENROUTER_API_KEY"],
-        default_headers={
-            "HTTP-Referer": CLASSIFIER["app_url"],
-            "X-Title": CLASSIFIER["app_name"],
-        },
-    )
+ANSWER_FORMAT = (
+    "\n\nANTWORTFORMAT\n"
+    'Antworte mit "ja" - oder "vielleicht: <kurzer Grund>" - oder "nein: <kurzer Grund>".'
+)
 
 
-def _system_prompt():
-    path = Path(CLASSIFIER["system_prompt_file"])
-    if not path.exists():
-        return None
-    content = path.read_text().strip()
-    return content or None
+def build_system_prompt(ja_prompt, nein_prompt, vielleicht_prompt, sonderregeln):
+    parts = ["Du bist ein Triage-Filter. Du vergibst drei Labels: \"ja\", \"vielleicht\" oder \"nein\"."]
+    parts.append(ANSWER_FORMAT)
+    parts.append("\nPRUEFREIHENFOLGE (erstes Treffen gewinnt)")
+    if (nein_prompt or "").strip():
+        parts.append("\n[1] AUSSCHLUSSGRUENDE -> \"nein\"\n" + nein_prompt.strip())
+    if (ja_prompt or "").strip():
+        parts.append("\n[2] ZIELKRITERIEN -> \"ja\"\n" + ja_prompt.strip())
+    if (vielleicht_prompt or "").strip():
+        parts.append("\n[3] SONST -> \"vielleicht\"\n" + vielleicht_prompt.strip())
+    if (sonderregeln or "").strip():
+        parts.append("\nSONDERREGELN\n" + sonderregeln.strip())
+    return "\n".join(parts)
 
 
 def _parse_response(raw):
@@ -46,15 +44,24 @@ def _parse_response(raw):
     return "vielleicht", cleaned[:200]
 
 
-def classify(user_message):
+def classify(user_message, *, api_key, model, system_prompt):
+    if not api_key:
+        raise RuntimeError("Kein OpenRouter-API-Key hinterlegt. Bitte in den Einstellungen setzen.")
+    client = OpenAI(
+        base_url=CLASSIFIER["base_url"],
+        api_key=api_key,
+        default_headers={
+            "HTTP-Referer": CLASSIFIER["app_url"],
+            "X-Title": CLASSIFIER["app_name"],
+        },
+    )
     messages = []
-    system = _system_prompt()
-    if system:
-        messages.append({"role": "system", "content": system})
+    if system_prompt:
+        messages.append({"role": "system", "content": system_prompt})
     messages.append({"role": "user", "content": user_message})
 
-    response = _client().chat.completions.create(
-        model=CLASSIFIER["model"],
+    response = client.chat.completions.create(
+        model=model,
         max_tokens=CLASSIFIER["max_tokens"],
         temperature=CLASSIFIER["temperature"],
         messages=messages,

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Neue Suche - Vinted Bot{% endblock %}
+{% block content %}
+
+<header class="mb-6">
+  <h1 class="text-2xl font-semibold tracking-tight">Neue Suche</h1>
+  <p class="mt-1 text-sm text-muted-foreground">Vinted-Link einfügen, Regeln prüfen, los.</p>
+</header>
+
+{% if not has_api_key %}
+<div class="alert alert-destructive mb-6">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+  <h2>Kein API-Key gesetzt</h2>
+  <section>
+    <a href="/settings" class="underline">In den Einstellungen</a> einen OpenRouter-Key hinterlegen, sonst kann die Suche nicht klassifiziert werden.
+  </section>
+</div>
+{% endif %}
+
+<form method="post" action="/searches" class="flex flex-col gap-6">
+  <div class="grid gap-2">
+    <label for="name" class="text-sm font-medium">Name <span class="text-muted-foreground font-normal">(optional)</span></label>
+    <input id="name" name="name" type="text" class="input" placeholder="z.B. Levi's 501 Herren bis 15€" autocomplete="off">
+  </div>
+
+  <div class="grid gap-2">
+    <label for="url" class="text-sm font-medium">Vinted-Link (mit Filtern)</label>
+    <input id="url" name="url" type="url" required class="input" placeholder="https://www.vinted.de/catalog?search_text=...">
+    <p class="text-xs text-muted-foreground">Direkt aus dem Browser kopieren, inklusive aller angehakten Filter.</p>
+  </div>
+
+  <div class="grid gap-2 md:grid-cols-2">
+    <div class="grid gap-2">
+      <label for="max_entries" class="text-sm font-medium">Max Einträge</label>
+      <input id="max_entries" name="max_entries" type="number" min="1" max="500" value="{{ defaults.max_entries }}" class="input">
+    </div>
+    <div class="grid gap-2">
+      <label for="model" class="text-sm font-medium">Modell</label>
+      <input id="model" name="model" type="text" value="{{ defaults.model }}" class="input" placeholder="anthropic/claude-haiku-4.5">
+    </div>
+  </div>
+
+  <div class="rounded-lg border bg-card p-4">
+    <h2 class="mb-3 text-sm font-semibold">Regeln</h2>
+    <p class="mb-4 text-xs text-muted-foreground">Werden zu einem System-Prompt zusammengesetzt. Leer lassen übernimmt die Standard-Regel aus den Einstellungen.</p>
+
+    <div class="grid gap-4">
+      <div class="grid gap-2">
+        <label for="ja_prompt" class="text-sm font-medium">Ja — was soll akzeptiert werden?</label>
+        <textarea id="ja_prompt" name="ja_prompt" rows="4" class="textarea" placeholder="Leer: Standard aus Einstellungen">{{ defaults.ja_prompt }}</textarea>
+      </div>
+      <div class="grid gap-2">
+        <label for="nein_prompt" class="text-sm font-medium">Nein — was soll abgelehnt werden?</label>
+        <textarea id="nein_prompt" name="nein_prompt" rows="4" class="textarea">{{ defaults.nein_prompt }}</textarea>
+      </div>
+      <div class="grid gap-2">
+        <label for="vielleicht_prompt" class="text-sm font-medium">Vielleicht — unsicher, wenn...</label>
+        <textarea id="vielleicht_prompt" name="vielleicht_prompt" rows="3" class="textarea">{{ defaults.vielleicht_prompt }}</textarea>
+      </div>
+      <div class="grid gap-2">
+        <label for="sonderregeln" class="text-sm font-medium">Sonderregeln</label>
+        <textarea id="sonderregeln" name="sonderregeln" rows="3" class="textarea" placeholder="Alles was nicht klar in ja/nein/vielleicht passt.">{{ defaults.sonderregeln }}</textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex items-center justify-end gap-3">
+    <button type="submit" class="btn btn-primary" {% if not has_api_key %}disabled{% endif %}>
+      Suche starten
+    </button>
+  </div>
+</form>
+
+{% endblock %}

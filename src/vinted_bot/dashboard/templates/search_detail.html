@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}{{ search.name or "Suche #" ~ search.id }} - Vinted Bot{% endblock %}
+{% block content %}
+
+<header class="mb-6">
+  <a href="/searches" class="mb-3 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    Verlauf
+  </a>
+  <div class="flex items-start justify-between gap-4">
+    <div class="min-w-0">
+      <h1 class="text-2xl font-semibold tracking-tight">{{ search.name or "Suche #" ~ search.id }}</h1>
+      <a href="{{ search.url }}" target="_blank" rel="noopener" class="mt-1 block truncate text-xs text-muted-foreground hover:text-foreground">{{ search.url }}</a>
+    </div>
+    {% include "_status_pill.html" %}
+  </div>
+</header>
+
+<nav class="mb-6 flex items-center gap-1 border-b">
+  {% set tabs = [('ja', 'Ja', counts.get('ja', 0)), ('vielleicht', 'Vielleicht', counts.get('vielleicht', 0)), ('nein', 'Abgelehnt', counts.get('nein', 0)), ('decided', 'Entschieden', counts.get('decided', 0)), ('all', 'Alle', counts.get('total', 0))] %}
+  {% for key, label, count in tabs %}
+  <a href="?show={{ key }}" class="relative -mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors {% if show == key %}border-foreground text-foreground{% else %}border-transparent text-muted-foreground hover:text-foreground{% endif %}">
+    {{ label }}
+    {% if count %}<span class="ml-1 text-xs text-muted-foreground">{{ count }}</span>{% endif %}
+  </a>
+  {% endfor %}
+</nav>
+
+{% if items %}
+<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+  {% for item in items %}
+  <a href="/item/{{ item.id }}?from={{ search.id }}" class="group overflow-hidden rounded-lg border bg-card transition-shadow hover:shadow-md">
+    <div class="relative aspect-square overflow-hidden bg-muted">
+      {% if item.thumb %}
+        <img src="/images/{{ item.thumb }}" alt="" class="h-full w-full object-cover" loading="lazy">
+      {% else %}
+        <div class="flex h-full items-center justify-center text-xs text-muted-foreground">kein Bild</div>
+      {% endif %}
+      {% if item.action %}
+      <div class="absolute right-2 top-2">
+        <span class="badge {% if item.action == 'kaufen' %}badge-primary{% elif item.action == 'verhandeln' %}badge-secondary{% else %}badge-outline{% endif %}">{{ item.action }}</span>
+      </div>
+      {% endif %}
+    </div>
+    <div class="p-3">
+      <p class="line-clamp-2 text-xs font-medium leading-snug">{{ item.title }}</p>
+      <div class="mt-2 flex items-baseline justify-between gap-2">
+        <span class="text-sm font-semibold">{{ "%.2f"|format(item.price or 0) }} {{ item.currency or 'EUR' }}</span>
+        <span class="text-[10px] text-muted-foreground">{{ item.size or '?' }}</span>
+      </div>
+      {% if item.reason and item.verdict in ('nein', 'vielleicht') %}
+      <p class="mt-2 line-clamp-2 text-[11px] italic text-muted-foreground">{{ item.reason }}</p>
+      {% endif %}
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="rounded-lg border border-dashed bg-card p-10 text-center">
+  <p class="text-sm text-muted-foreground">
+    {% if search.status in ('running', 'pending') %}
+      Suche läuft gerade. Items erscheinen hier in Echtzeit.
+    {% elif search.status == 'error' %}
+      Fehler: {{ search.error or "unbekannt" }}
+    {% else %}
+      Keine Items in diesem Filter.
+    {% endif %}
+  </p>
+</div>
+{% endif %}
+
+{% endblock %}

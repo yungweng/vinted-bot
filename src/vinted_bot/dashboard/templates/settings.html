@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Einstellungen - Vinted Bot{% endblock %}
+{% block content %}
+
+<header class="mb-6">
+  <h1 class="text-2xl font-semibold tracking-tight">Einstellungen</h1>
+  <p class="mt-1 text-sm text-muted-foreground">API-Key, Standard-Regeln, Datenbank.</p>
+</header>
+
+{% if saved %}
+<div class="alert mb-6">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+  <h2>Gespeichert.</h2>
+</div>
+{% endif %}
+
+<form method="post" action="/settings" class="flex flex-col gap-6">
+
+  <div class="rounded-lg border bg-card p-4">
+    <h2 class="mb-3 text-sm font-semibold">OpenRouter</h2>
+    <div class="grid gap-4">
+      <div class="grid gap-2">
+        <label for="api_key" class="text-sm font-medium">API-Key</label>
+        <input id="api_key" name="api_key" type="password" value="{{ config.api_key or '' }}" class="input" placeholder="sk-or-..." autocomplete="off">
+        <p class="text-xs text-muted-foreground">Dein OpenRouter-Key. Wird in der lokalen SQLite gespeichert.</p>
+      </div>
+      <div class="grid gap-2">
+        <label for="model" class="text-sm font-medium">Modell</label>
+        <input id="model" name="model" type="text" value="{{ config.model or 'anthropic/claude-haiku-4.5' }}" class="input" placeholder="anthropic/claude-haiku-4.5">
+        <p class="text-xs text-muted-foreground">Z.B. <code>anthropic/claude-haiku-4.5</code>, <code>openai/gpt-4o-mini</code>.</p>
+      </div>
+      <div class="grid gap-2">
+        <label for="max_entries" class="text-sm font-medium">Max Einträge pro Suche</label>
+        <input id="max_entries" name="max_entries" type="number" min="1" max="500" value="{{ config.max_entries or 50 }}" class="input">
+      </div>
+    </div>
+  </div>
+
+  <div class="rounded-lg border bg-card p-4">
+    <h2 class="mb-3 text-sm font-semibold">Standard-Regeln</h2>
+    <p class="mb-4 text-xs text-muted-foreground">Vorbelegung für neue Suchen. Pro Suche überschreibbar.</p>
+    <div class="grid gap-4">
+      <div class="grid gap-2">
+        <label for="default_ja_prompt" class="text-sm font-medium">Ja</label>
+        <textarea id="default_ja_prompt" name="default_ja_prompt" rows="4" class="textarea">{{ config.default_ja_prompt or '' }}</textarea>
+      </div>
+      <div class="grid gap-2">
+        <label for="default_nein_prompt" class="text-sm font-medium">Nein</label>
+        <textarea id="default_nein_prompt" name="default_nein_prompt" rows="5" class="textarea">{{ config.default_nein_prompt or '' }}</textarea>
+      </div>
+      <div class="grid gap-2">
+        <label for="default_vielleicht_prompt" class="text-sm font-medium">Vielleicht</label>
+        <textarea id="default_vielleicht_prompt" name="default_vielleicht_prompt" rows="3" class="textarea">{{ config.default_vielleicht_prompt or '' }}</textarea>
+      </div>
+      <div class="grid gap-2">
+        <label for="default_sonderregeln" class="text-sm font-medium">Sonderregeln</label>
+        <textarea id="default_sonderregeln" name="default_sonderregeln" rows="3" class="textarea">{{ config.default_sonderregeln or '' }}</textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex justify-end">
+    <button type="submit" class="btn btn-primary">Speichern</button>
+  </div>
+</form>
+
+<div class="mt-10 rounded-lg border border-destructive/40 bg-destructive/5 p-4" x-data="{ confirmOpen: false }">
+  <h2 class="mb-2 text-sm font-semibold text-destructive">Gefahrenzone</h2>
+  <p class="mb-4 text-xs text-muted-foreground">Löscht alle Suchen, Items und Bilder. Einstellungen (API-Key, Modell, Standard-Regeln) bleiben erhalten.</p>
+  <button type="button" class="btn btn-destructive btn-sm" @click="confirmOpen = true">Datenbank zurücksetzen</button>
+
+  <div x-show="confirmOpen" x-cloak
+       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+       @keydown.escape.window="confirmOpen = false">
+    <div class="w-full max-w-md rounded-lg border bg-card p-6 shadow-lg" @click.outside="confirmOpen = false">
+      <h3 class="text-lg font-semibold">Sicher?</h3>
+      <p class="mt-2 text-sm text-muted-foreground">Alle Suchen, klassifizierten Items und heruntergeladenen Bilder werden gelöscht. Einstellungen bleiben.</p>
+      <div class="mt-6 flex justify-end gap-3">
+        <button type="button" class="btn btn-outline" @click="confirmOpen = false">Abbrechen</button>
+        <form method="post" action="/settings/reset-db">
+          <button type="submit" class="btn btn-destructive">Ja, alles löschen</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

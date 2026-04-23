@@ -1,0 +1,4 @@
+Wenn kein Ausschlussgrund vorliegt UND kein Zielmodell eindeutig erkennbar ist,
+antworte "vielleicht: <kurzer Grund>".
+Beispiele: "Modell unbekannt", "Modell 510, nicht in Zielliste", "Titel ohne Modellangabe".
+Im Zweifel nie "nein", sondern "vielleicht".

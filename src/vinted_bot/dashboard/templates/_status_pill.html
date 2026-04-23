@@ -1,0 +1,21 @@
+<div id="status-pill"
+  {% if search.status in ('running', 'pending') %}
+  hx-get="/searches/{{ search.id }}/status"
+  hx-trigger="every 2s"
+  hx-swap="outerHTML"
+  {% endif %}
+  class="flex shrink-0 items-center gap-2">
+  {% if search.status == 'running' %}
+    <span class="relative flex h-2 w-2">
+      <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75"></span>
+      <span class="relative inline-flex h-2 w-2 rounded-full bg-amber-500"></span>
+    </span>
+    <span class="text-xs text-muted-foreground">Scrape läuft...</span>
+  {% elif search.status == 'pending' %}
+    <span class="text-xs text-muted-foreground">wartet...</span>
+  {% elif search.status == 'error' %}
+    <span class="badge badge-destructive">Fehler</span>
+  {% else %}
+    <span class="text-xs text-muted-foreground">fertig</span>
+  {% endif %}
+</div>

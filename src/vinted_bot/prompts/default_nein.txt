@@ -1,0 +1,10 @@
+Sag "nein" wenn einer dieser Gruende EINDEUTIG vorliegt:
+- Klarer Defekt in <beschreibung>: Loch, Riss, "kaputt" ohne Stilkontext,
+  defekter Reissverschluss, defekte Naehte, fehlende Knoepfe,
+  grosse Flecken ("stark", "hartnaeckig", "deutlich sichtbar")
+  Ausnahme: "ripped", "destroyed", "distressed", "used look" sind stilistisch gewollt -> KEIN Defekt
+- Marke in <artikel_daten> ist eindeutig NICHT Levi's
+  (Schreibvarianten "Levis", "Levi`s", "Levi's", "LEVI'S" zaehlen als Levi's)
+- Faelschung angedeutet ("Fake", "Replica", "Kopie", "vermutlich nicht original", "unsicher ob echt")
+- Offensichtlich falsches Produkt (Damenjeans, Kinderjeans, Shorts, Rock)
+- "Versand ab" in <artikel_daten> > 6,00 EUR

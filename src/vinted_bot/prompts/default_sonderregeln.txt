@@ -1,0 +1,5 @@
+IGNORIEREN (keine Ablehnungsgruende, kein Zwang fuer "vielleicht"):
+- Unklare oder fehlende Groessenangabe
+- Hoher oder niedriger Preis
+- Vage oder kurze Beschreibung
+- Kein Leder-Patch sichtbar

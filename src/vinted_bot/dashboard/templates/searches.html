@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Verlauf - Vinted Bot{% endblock %}
+{% block content %}
+
+<header class="mb-6 flex items-center justify-between">
+  <div>
+    <h1 class="text-2xl font-semibold tracking-tight">Verlauf</h1>
+    <p class="mt-1 text-sm text-muted-foreground">Alle Suchen. Klick drauf für Details.</p>
+  </div>
+  <a href="/" class="btn btn-primary btn-sm">Neue Suche</a>
+</header>
+
+{% if searches %}
+<div class="grid gap-3">
+  {% for s in searches %}
+  <a href="/searches/{{ s.id }}" class="group rounded-lg border bg-card p-4 transition-colors hover:bg-accent/40">
+    <div class="flex items-start justify-between gap-4">
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center gap-2">
+          <span class="truncate text-sm font-semibold">{{ s.name or "Suche #" ~ s.id }}</span>
+          {% if s.status == 'running' %}
+            <span class="badge badge-secondary">läuft</span>
+          {% elif s.status == 'pending' %}
+            <span class="badge badge-outline">wartet</span>
+          {% elif s.status == 'error' %}
+            <span class="badge badge-destructive">Fehler</span>
+          {% else %}
+            <span class="badge badge-outline">fertig</span>
+          {% endif %}
+        </div>
+        <div class="mt-1 truncate text-xs text-muted-foreground">{{ s.url }}</div>
+        <div class="mt-2 text-xs text-muted-foreground">{{ s.created_at }}</div>
+      </div>
+      <div class="flex shrink-0 items-center gap-3 text-xs">
+        <span class="flex items-center gap-1">
+          <span class="inline-block h-2 w-2 rounded-full bg-green-500"></span>
+          <span class="font-medium">{{ s.count_ja }}</span>
+          <span class="text-muted-foreground">ja</span>
+        </span>
+        <span class="flex items-center gap-1">
+          <span class="inline-block h-2 w-2 rounded-full bg-amber-500"></span>
+          <span class="font-medium">{{ s.count_vielleicht }}</span>
+          <span class="text-muted-foreground">vielleicht</span>
+        </span>
+        <span class="flex items-center gap-1">
+          <span class="inline-block h-2 w-2 rounded-full bg-neutral-400"></span>
+          <span class="font-medium">{{ s.count_nein }}</span>
+          <span class="text-muted-foreground">nein</span>
+        </span>
+      </div>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="rounded-lg border border-dashed bg-card p-10 text-center">
+  <p class="text-sm text-muted-foreground">Noch keine Suchen. <a href="/" class="font-medium text-foreground underline">Jetzt eine starten.</a></p>
+</div>
+{% endif %}
+
+{% endblock %}

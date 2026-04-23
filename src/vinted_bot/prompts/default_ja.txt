@@ -1,0 +1,5 @@
+Sag "ja" wenn eine dieser vier Modellnummern EINDEUTIG erwaehnt wird:
+501, 512, 705, 578
+Quellen: Titel, Beschreibung oder <bilder_ocr>. Eine Quelle reicht.
+OCR-Text ist oft unzuverlaessig - werte ihn nur wenn die Zahl klar lesbar steht.
+Pseudo-Treffer wie "50" + "1" durch OCR-Rauschen zaehlen nicht.
