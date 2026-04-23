@@ -9,7 +9,10 @@ def fetch_item_page(session, item_url):
     r = session.session.get(
         item_url,
         timeout=SCRAPER["request_timeout"],
-        headers={"Referer": SCRAPER["base_url"] + "/"},
+        headers={
+            "Referer": SCRAPER["base_url"] + "/",
+            "Accept-Language": SCRAPER["accept_language"],
+        },
     )
     r.raise_for_status()
     return r.text

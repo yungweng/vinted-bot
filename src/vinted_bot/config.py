@@ -16,7 +16,9 @@ OCR = {
 SCRAPER = {
     "request_delay_seconds": 1.5,
     "request_timeout": 20,
-    "impersonate": "chrome124",
+    "impersonate": "chrome136",
+    "impersonate_fallbacks": ["chrome131", "chrome146", "chrome124"],
+    "accept_language": "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7",
     "base_url": "https://www.vinted.de",
 }
 
