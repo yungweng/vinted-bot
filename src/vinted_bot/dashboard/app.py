@@ -113,12 +113,11 @@ _BASE_ITEM_QUERY = """
 """
 
 
-@app.get("/searches/{search_id}", response_class=HTMLResponse)
-def search_detail(request: Request, search_id: int, show: str = "ja"):
+def _load_search_view(search_id: int, show: str):
     with connect() as con:
         search = get_search(con, search_id)
         if not search:
-            return HTMLResponse("Suche nicht gefunden", status_code=404)
+            return None
         counts_rows = con.execute(
             """
             SELECT c.verdict, COUNT(*) AS n
@@ -171,18 +170,32 @@ def search_detail(request: Request, search_id: int, show: str = "ja"):
                 + " ORDER BY i.fetched_at DESC",
                 (search_id,),
             ).fetchall()
-    items = [dict(r) for r in rows]
+    return {
+        "search": search,
+        "items": [dict(r) for r in rows],
+        "show": show,
+        "counts": counts,
+    }
+
+
+@app.get("/searches/{search_id}", response_class=HTMLResponse)
+def search_detail(request: Request, search_id: int, show: str = "ja"):
+    view = _load_search_view(search_id, show)
+    if view is None:
+        return HTMLResponse("Suche nicht gefunden", status_code=404)
     return templates.TemplateResponse(
         request,
         "search_detail.html",
-        {
-            "active": "searches",
-            "search": search,
-            "items": items,
-            "show": show,
-            "counts": counts,
-        },
+        {"active": "searches", **view},
     )
+
+
+@app.get("/searches/{search_id}/content", response_class=HTMLResponse)
+def search_content(request: Request, search_id: int, show: str = "ja"):
+    view = _load_search_view(search_id, show)
+    if view is None:
+        return HTMLResponse("", status_code=404)
+    return templates.TemplateResponse(request, "_search_content.html", view)
 
 
 @app.get("/searches/{search_id}/status", response_class=HTMLResponse)
