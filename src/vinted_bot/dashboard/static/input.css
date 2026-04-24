@@ -29,3 +29,11 @@
 }
 
 [x-cloak] { display: none !important; }
+
+/* basecoat's .btn / .badge base rules force the primary background + foreground
+   on every element that also has the base class. Outline and ghost variants
+   never set their own color/background, so combining them with the base leaks
+   a near-white foreground onto a light background (btn) or dark-on-dark
+   (badge). Re-assert transparent bg + foreground color. */
+.btn-outline, .btn-ghost { color: var(--color-foreground); }
+.badge-outline { background-color: transparent; color: var(--color-foreground); }

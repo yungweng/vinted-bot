@@ -1,0 +1,17 @@
+<div id="item-action" class="mb-6">
+  <div class="mb-2 flex min-h-5 items-center gap-2 text-xs">
+    {% if item.action %}
+    <span class="badge badge-outline">Entscheidung: {{ item.action }}</span>
+    {% else %}
+    <span class="text-muted-foreground">Noch nicht entschieden.</span>
+    {% endif %}
+  </div>
+  <div class="grid grid-cols-3 gap-3">
+    {% for key, label, cls in [('kaufen', 'Kaufen', 'btn-primary'), ('verhandeln', 'Verhandeln', 'btn-secondary'), ('nein', 'Nein', 'btn-outline')] %}
+    <form hx-post="/item/{{ item.id }}/action" hx-target="#item-action" hx-swap="outerHTML">
+      <input type="hidden" name="action" value="{{ key }}">
+      <button type="submit" class="btn {{ cls }} w-full {% if item.action == key %}ring-2 ring-offset-2 ring-foreground{% endif %}">{{ label }}</button>
+    </form>
+    {% endfor %}
+  </div>
+</div>

@@ -21,9 +21,6 @@
     <span class="badge {% if item.verdict == 'ja' %}badge-primary{% elif item.verdict == 'vielleicht' %}badge-secondary{% else %}badge-outline{% endif %}">
       {{ item.verdict }}
     </span>
-    {% if item.action %}
-    <span class="badge badge-outline">Aktion: {{ item.action }}</span>
-    {% endif %}
     <span class="text-muted-foreground">{{ item.brand or '?' }} · Größe {{ item.size or '?' }} · {{ item.condition or '?' }} · {{ item.color or '?' }}</span>
     <a href="{{ item.url }}" target="_blank" rel="noopener" class="ml-auto inline-flex items-center gap-1 underline hover:text-foreground">
       auf Vinted
@@ -40,20 +37,7 @@
 </div>
 {% endif %}
 
-<div class="mb-6 grid grid-cols-3 gap-3">
-  <form method="post" action="/item/{{ item.id }}/action" hx-post="/item/{{ item.id }}/action" hx-swap="none">
-    <input type="hidden" name="action" value="kaufen">
-    <button type="submit" class="btn btn-primary w-full {% if item.action == 'kaufen' %}ring-2 ring-offset-2 ring-foreground{% endif %}">Kaufen</button>
-  </form>
-  <form method="post" action="/item/{{ item.id }}/action" hx-post="/item/{{ item.id }}/action" hx-swap="none">
-    <input type="hidden" name="action" value="verhandeln">
-    <button type="submit" class="btn btn-secondary w-full {% if item.action == 'verhandeln' %}ring-2 ring-offset-2 ring-foreground{% endif %}">Verhandeln</button>
-  </form>
-  <form method="post" action="/item/{{ item.id }}/action" hx-post="/item/{{ item.id }}/action" hx-swap="none">
-    <input type="hidden" name="action" value="nein">
-    <button type="submit" class="btn btn-outline w-full {% if item.action == 'nein' %}ring-2 ring-offset-2 ring-foreground{% endif %}">Nein</button>
-  </form>
-</div>
+{% include "_item_action.html" %}
 
 {% if images %}
 <div x-data="imageModal()" @keydown.escape.window="close()" class="mb-6">

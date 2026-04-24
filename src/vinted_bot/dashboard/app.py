@@ -121,18 +121,27 @@ def _load_search_view(search_id: int, show: str):
         counts_rows = con.execute(
             """
             SELECT c.verdict, COUNT(*) AS n
-            FROM items i JOIN classifications c ON c.item_id = i.id
-            WHERE i.search_id = ?
+            FROM items i
+            JOIN classifications c ON c.item_id = i.id
+            LEFT JOIN user_actions u ON u.item_id = i.id
+            WHERE i.search_id = ? AND u.action IS NULL
             GROUP BY c.verdict
             """,
             (search_id,),
         ).fetchall()
         counts = {r["verdict"]: r["n"] for r in counts_rows}
-        counts["total"] = sum(counts.values())
         counts["decided"] = con.execute(
             """
             SELECT COUNT(*) FROM items i
             JOIN user_actions u ON u.item_id = i.id
+            WHERE i.search_id = ?
+            """,
+            (search_id,),
+        ).fetchone()[0]
+        counts["total"] = con.execute(
+            """
+            SELECT COUNT(*) FROM items i
+            JOIN classifications c ON c.item_id = i.id
             WHERE i.search_id = ?
             """,
             (search_id,),
@@ -146,7 +155,8 @@ def _load_search_view(search_id: int, show: str):
         elif show == "nein":
             rows = con.execute(
                 _BASE_ITEM_QUERY
-                + " AND c.verdict = 'nein' ORDER BY i.fetched_at DESC",
+                + " AND c.verdict = 'nein' AND u.action IS NULL"
+                + " ORDER BY i.fetched_at DESC",
                 (search_id,),
             ).fetchall()
         elif show == "vielleicht":
@@ -240,7 +250,7 @@ def item_detail(request: Request, item_id: int, from_: str | None = None):
 
 
 @app.post("/item/{item_id}/action")
-def set_action(item_id: int, action: str = Form(...)):
+def set_action(request: Request, item_id: int, action: str = Form(...)):
     if action not in {"kaufen", "verhandeln", "nein"}:
         return JSONResponse({"ok": False, "error": "invalid action"}, status_code=400)
     with connect() as con:
@@ -252,7 +262,11 @@ def set_action(item_id: int, action: str = Form(...)):
             """,
             (item_id, action),
         )
-    return {"ok": True, "action": action}
+        row = con.execute(
+            "SELECT id, action FROM items i LEFT JOIN user_actions u ON u.item_id = i.id WHERE i.id = ?",
+            (item_id,),
+        ).fetchone()
+    return templates.TemplateResponse(request, "_item_action.html", {"item": dict(row)})
 
 
 # ---------- settings ----------
