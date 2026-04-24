@@ -56,12 +56,46 @@
 </div>
 
 {% if images %}
-<div class="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-  {% for img in images %}
-    <a href="/images/{{ img.local_path }}" target="_blank">
-      <img src="/images/{{ img.local_path }}" loading="lazy" class="aspect-square w-full rounded-md border bg-muted object-cover">
-    </a>
-  {% endfor %}
+<div x-data="imageModal()" @keydown.escape.window="close()" class="mb-6">
+  <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+    {% for img in images %}
+      <button type="button" @click="open('/images/{{ img.local_path }}')" class="block aspect-square w-full overflow-hidden rounded-md border bg-muted">
+        <img src="/images/{{ img.local_path }}" loading="lazy" class="h-full w-full object-cover transition-transform duration-200 hover:scale-105">
+      </button>
+    {% endfor %}
+  </div>
+
+  <div
+    x-show="isOpen"
+    x-cloak
+    x-transition.opacity
+    @click.self="close()"
+    @wheel.prevent="onWheel($event)"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4"
+  >
+    <button type="button" @click="close()" aria-label="Schließen" class="absolute right-4 top-4 rounded-md bg-white/10 p-2 text-white transition-colors hover:bg-white/20">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+
+    <div class="pointer-events-none absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-md bg-white/10 px-1 py-1 text-xs text-white backdrop-blur">
+      <button type="button" @click="zoomOut()" aria-label="Verkleinern" class="pointer-events-auto rounded px-3 py-1 hover:bg-white/20">&minus;</button>
+      <span x-text="Math.round(zoom * 100) + '%'" class="min-w-14 text-center tabular-nums"></span>
+      <button type="button" @click="zoomIn()" aria-label="Vergrößern" class="pointer-events-auto rounded px-3 py-1 hover:bg-white/20">+</button>
+      <button type="button" @click="reset()" class="pointer-events-auto rounded px-3 py-1 hover:bg-white/20">Reset</button>
+    </div>
+
+    <img
+      :src="src"
+      @click="onImageClick()"
+      @pointerdown="onPointerDown($event)"
+      @pointermove="onPointerMove($event)"
+      @pointerup="onPointerUp($event)"
+      @pointercancel="onPointerUp($event)"
+      @dragstart.prevent
+      :style="`transform: translate(${panX}px, ${panY}px) scale(${zoom}); transition: ${dragging ? 'none' : 'transform 0.15s ease-out'}; cursor: ${zoom > 1 ? (dragging ? 'grabbing' : 'grab') : 'zoom-in'}; touch-action: none;`"
+      class="max-h-[90vh] max-w-[90vw] select-none"
+    >
+  </div>
 </div>
 {% endif %}
 
@@ -70,13 +104,85 @@
   <div class="whitespace-pre-wrap rounded-lg border bg-card p-4 text-sm leading-relaxed">{{ item.description or "(keine Beschreibung)" }}</div>
 </section>
 
-<section>
-  <h3 class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">OCR der Bilder</h3>
-  <div class="whitespace-pre-wrap rounded-lg border bg-muted p-4 font-mono text-xs leading-relaxed text-muted-foreground">{{ item.ocr_text or "(kein OCR)" }}</div>
-</section>
-
 {% else %}
 <p class="text-sm text-muted-foreground">Artikel nicht gefunden.</p>
 {% endif %}
 
+{% endblock %}
+
+{% block scripts %}
+<style>[x-cloak]{display:none!important}</style>
+<script>
+function imageModal() {
+  return {
+    isOpen: false,
+    src: '',
+    zoom: 1,
+    panX: 0,
+    panY: 0,
+    dragging: false,
+    didDrag: false,
+    startX: 0,
+    startY: 0,
+    open(src) {
+      this.src = src;
+      this.reset();
+      this.isOpen = true;
+      document.body.style.overflow = 'hidden';
+    },
+    close() {
+      this.isOpen = false;
+      document.body.style.overflow = '';
+    },
+    reset() {
+      this.zoom = 1;
+      this.panX = 0;
+      this.panY = 0;
+    },
+    clampPan() {
+      if (this.zoom <= 1) { this.panX = 0; this.panY = 0; }
+    },
+    zoomIn() {
+      this.zoom = Math.min(this.zoom * 1.25, 6);
+    },
+    zoomOut() {
+      this.zoom = Math.max(this.zoom / 1.25, 0.5);
+      this.clampPan();
+    },
+    onWheel(e) {
+      const factor = e.deltaY < 0 ? 1.1 : 1 / 1.1;
+      this.zoom = Math.max(0.5, Math.min(6, this.zoom * factor));
+      this.clampPan();
+    },
+    onImageClick() {
+      if (this.didDrag) { this.didDrag = false; return; }
+      if (this.zoom === 1) { this.zoom = 2; }
+      else { this.reset(); }
+    },
+    onPointerDown(e) {
+      if (this.zoom <= 1) return;
+      this.dragging = true;
+      this.didDrag = false;
+      this.startX = e.clientX - this.panX;
+      this.startY = e.clientY - this.panY;
+      e.target.setPointerCapture(e.pointerId);
+    },
+    onPointerMove(e) {
+      if (!this.dragging) return;
+      const nx = e.clientX - this.startX;
+      const ny = e.clientY - this.startY;
+      if (Math.abs(nx - this.panX) > 1 || Math.abs(ny - this.panY) > 1) {
+        this.didDrag = true;
+      }
+      this.panX = nx;
+      this.panY = ny;
+    },
+    onPointerUp(e) {
+      if (!this.dragging) return;
+      this.dragging = false;
+      try { e.target.releasePointerCapture(e.pointerId); } catch (_) {}
+    },
+  };
+}
+</script>
 {% endblock %}
