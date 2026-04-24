@@ -47,14 +47,16 @@ def _parse_response(raw):
 def classify(user_message, *, api_key, model, system_prompt, base_url):
     if not api_key:
         raise RuntimeError("Kein API-Key hinterlegt. Bitte in den Einstellungen setzen.")
-    client = OpenAI(
-        base_url=base_url,
-        api_key=api_key,
-        default_headers={
+    client_kwargs = {"base_url": base_url, "api_key": api_key}
+    # OpenRouter uses these headers for public app ranking. Anthropic silently
+    # ignores them, but some older SDK/httpx combos choke encoding custom
+    # headers, so send them only to OpenRouter.
+    if "openrouter.ai" in base_url:
+        client_kwargs["default_headers"] = {
             "HTTP-Referer": CLASSIFIER["app_url"],
             "X-Title": CLASSIFIER["app_name"],
-        },
-    )
+        }
+    client = OpenAI(**client_kwargs)
     messages = []
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})

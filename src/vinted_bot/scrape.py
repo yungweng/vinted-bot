@@ -128,6 +128,7 @@ def _run(search_id, log):
             )
         except Exception as e:
             log(f"  classify fehlgeschlagen: {e}")
+            traceback.print_exc()
             errors += 1
             continue
 
