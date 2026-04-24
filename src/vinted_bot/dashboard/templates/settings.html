@@ -4,7 +4,7 @@
 
 <header class="mb-6">
   <h1 class="text-2xl font-semibold tracking-tight">Einstellungen</h1>
-  <p class="mt-1 text-sm text-muted-foreground">API-Key, Standard-Regeln, Datenbank.</p>
+  <p class="mt-1 text-sm text-muted-foreground">Provider, API-Keys, Standard-Regeln, Datenbank.</p>
 </header>
 
 {% if saved %}
@@ -17,22 +17,40 @@
 <form method="post" action="/settings" class="flex flex-col gap-6">
 
   <div class="rounded-lg border bg-card p-4">
-    <h2 class="mb-3 text-sm font-semibold">OpenRouter</h2>
+    <h2 class="mb-3 text-sm font-semibold">Provider</h2>
+    <p class="mb-4 text-xs text-muted-foreground">Aktiver Provider für alle Klassifizierungen. Keys für beide Provider können unabhängig voneinander gespeichert werden.</p>
+    <div class="grid gap-2">
+      <label for="provider" class="text-sm font-medium">Aktiver Provider</label>
+      <select id="provider" name="provider" class="input">
+        {% for key, p in providers.items() %}
+          <option value="{{ key }}" {% if config.provider == key %}selected{% endif %}>{{ p.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  {% for key, p in providers.items() %}
+  <div class="rounded-lg border bg-card p-4">
+    <h2 class="mb-3 text-sm font-semibold">{{ p.label }}</h2>
     <div class="grid gap-4">
       <div class="grid gap-2">
-        <label for="api_key" class="text-sm font-medium">API-Key</label>
-        <input id="api_key" name="api_key" type="password" value="{{ config.api_key or '' }}" class="input" placeholder="sk-or-..." autocomplete="off">
-        <p class="text-xs text-muted-foreground">Dein OpenRouter-Key. Wird in der lokalen SQLite gespeichert.</p>
+        <label for="{{ key }}_api_key" class="text-sm font-medium">API-Key</label>
+        <input id="{{ key }}_api_key" name="{{ key }}_api_key" type="password" value="{{ config[key ~ '_api_key'] or '' }}" class="input" placeholder="{{ p.key_placeholder }}" autocomplete="off">
+        <p class="text-xs text-muted-foreground">Key erzeugen: <a href="{{ p.key_url }}" target="_blank" rel="noopener" class="underline">{{ p.key_url }}</a></p>
       </div>
       <div class="grid gap-2">
-        <label for="model" class="text-sm font-medium">Modell</label>
-        <input id="model" name="model" type="text" value="{{ config.model or 'anthropic/claude-haiku-4.5' }}" class="input" placeholder="anthropic/claude-haiku-4.5">
-        <p class="text-xs text-muted-foreground">Z.B. <code>anthropic/claude-haiku-4.5</code>, <code>openai/gpt-4o-mini</code>.</p>
+        <label for="{{ key }}_model" class="text-sm font-medium">Modell</label>
+        <input id="{{ key }}_model" name="{{ key }}_model" type="text" value="{{ config[key ~ '_model'] or p.default_model }}" class="input" placeholder="{{ p.default_model }}">
       </div>
-      <div class="grid gap-2">
-        <label for="max_entries" class="text-sm font-medium">Max Einträge pro Suche</label>
-        <input id="max_entries" name="max_entries" type="number" min="1" max="500" value="{{ config.max_entries or 50 }}" class="input">
-      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="rounded-lg border bg-card p-4">
+    <h2 class="mb-3 text-sm font-semibold">Limits</h2>
+    <div class="grid gap-2">
+      <label for="max_entries" class="text-sm font-medium">Max Einträge pro Suche</label>
+      <input id="max_entries" name="max_entries" type="number" min="1" max="500" value="{{ config.max_entries or 50 }}" class="input">
     </div>
   </div>
 
@@ -66,7 +84,7 @@
 
 <div class="mt-10 rounded-lg border border-destructive/40 bg-destructive/5 p-4" x-data="{ confirmOpen: false }">
   <h2 class="mb-2 text-sm font-semibold text-destructive">Gefahrenzone</h2>
-  <p class="mb-4 text-xs text-muted-foreground">Löscht alle Suchen, Items und Bilder. Einstellungen (API-Key, Modell, Standard-Regeln) bleiben erhalten.</p>
+  <p class="mb-4 text-xs text-muted-foreground">Löscht alle Suchen, Items und Bilder. Einstellungen (API-Keys, Modelle, Standard-Regeln) bleiben erhalten.</p>
   <button type="button" class="btn btn-destructive btn-sm" @click="confirmOpen = true">Datenbank zurücksetzen</button>
 
   <div x-show="confirmOpen" x-cloak

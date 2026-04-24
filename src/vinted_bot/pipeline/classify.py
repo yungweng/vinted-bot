@@ -44,11 +44,11 @@ def _parse_response(raw):
     return "vielleicht", cleaned[:200]
 
 
-def classify(user_message, *, api_key, model, system_prompt):
+def classify(user_message, *, api_key, model, system_prompt, base_url):
     if not api_key:
-        raise RuntimeError("Kein OpenRouter-API-Key hinterlegt. Bitte in den Einstellungen setzen.")
+        raise RuntimeError("Kein API-Key hinterlegt. Bitte in den Einstellungen setzen.")
     client = OpenAI(
-        base_url=CLASSIFIER["base_url"],
+        base_url=base_url,
         api_key=api_key,
         default_headers={
             "HTTP-Referer": CLASSIFIER["app_url"],

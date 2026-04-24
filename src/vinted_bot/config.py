@@ -25,9 +25,25 @@ SCRAPER = {
 CLASSIFIER = {
     "max_tokens": 120,
     "temperature": 0.0,
-    "base_url": "https://openrouter.ai/api/v1",
     "app_name": "vinted-bot",
     "app_url": "http://localhost",
+}
+
+PROVIDERS = {
+    "openrouter": {
+        "label": "OpenRouter",
+        "base_url": "https://openrouter.ai/api/v1",
+        "default_model": "anthropic/claude-haiku-4.5",
+        "key_placeholder": "sk-or-v1-...",
+        "key_url": "https://openrouter.ai/keys",
+    },
+    "anthropic": {
+        "label": "Anthropic (direkt)",
+        "base_url": "https://api.anthropic.com/v1/",
+        "default_model": "claude-haiku-4-5",
+        "key_placeholder": "sk-ant-...",
+        "key_url": "https://console.anthropic.com/settings/keys",
+    },
 }
 
 SEARCH_OVERRIDES = {

@@ -2,7 +2,7 @@ import time
 import traceback
 from pathlib import Path
 
-from vinted_bot.config import PATHS, SCRAPER, SEARCH_OVERRIDES
+from vinted_bot.config import PATHS, PROVIDERS, SCRAPER, SEARCH_OVERRIDES
 from vinted_bot.pipeline.classify import build_system_prompt, classify
 from vinted_bot.pipeline.images import download_item_images
 from vinted_bot.pipeline.ocr import ocr_images
@@ -41,11 +41,20 @@ def _run(search_id, log):
         config = get_all_config(con)
         update_search_status(con, search_id, "running")
 
-    api_key = (config.get("api_key") or "").strip()
-    if not api_key:
-        raise RuntimeError("Kein OpenRouter-API-Key in den Einstellungen.")
+    provider_key = (config.get("provider") or "openrouter").strip()
+    if provider_key not in PROVIDERS:
+        raise RuntimeError(f"Unbekannter Provider in Einstellungen: {provider_key!r}")
+    provider = PROVIDERS[provider_key]
 
-    model = (search.get("model") or config.get("model") or "anthropic/claude-haiku-4.5").strip()
+    api_key = (config.get(f"{provider_key}_api_key") or "").strip()
+    if not api_key:
+        raise RuntimeError(
+            f"Kein API-Key fuer {provider['label']} in den Einstellungen."
+        )
+
+    default_model = (config.get(f"{provider_key}_model") or provider["default_model"]).strip()
+    model = (search.get("model") or default_model).strip()
+    base_url = provider["base_url"]
     max_entries = search.get("max_entries")
     if not max_entries or int(max_entries) <= 0:
         max_entries = int(config.get("max_entries") or 50)
@@ -115,6 +124,7 @@ def _run(search_id, log):
                 api_key=api_key,
                 model=model,
                 system_prompt=system_prompt,
+                base_url=base_url,
             )
         except Exception as e:
             log(f"  classify fehlgeschlagen: {e}")

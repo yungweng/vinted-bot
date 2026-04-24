@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from vinted_bot.config import PATHS
+from vinted_bot.config import PATHS, PROVIDERS
 from vinted_bot.scrape import run_search
 from vinted_bot.storage.db import (
     connect,
@@ -33,9 +33,13 @@ app.mount("/static", StaticFiles(directory=str(BASE / "static")), name="static")
 def new_search_form(request: Request):
     with connect() as con:
         config = get_all_config(con)
+    provider_key = config.get("provider") or "openrouter"
+    provider = PROVIDERS.get(provider_key, PROVIDERS["openrouter"])
+    default_model = config.get(f"{provider_key}_model") or provider["default_model"]
+    has_provider_key = bool((config.get(f"{provider_key}_api_key") or "").strip())
     defaults = {
         "max_entries": int(config.get("max_entries") or 50),
-        "model": config.get("model") or "anthropic/claude-haiku-4.5",
+        "model": default_model,
         "ja_prompt": config.get("default_ja_prompt") or "",
         "nein_prompt": config.get("default_nein_prompt") or "",
         "vielleicht_prompt": config.get("default_vielleicht_prompt") or "",
@@ -47,7 +51,8 @@ def new_search_form(request: Request):
         {
             "active": "new",
             "defaults": defaults,
-            "has_api_key": bool((config.get("api_key") or "").strip()),
+            "has_provider_key": has_provider_key,
+            "provider_label": provider["label"],
         },
     )
 
@@ -240,13 +245,14 @@ def set_action(item_id: int, action: str = Form(...)):
 # ---------- settings ----------
 
 _SETTINGS_KEYS = (
-    "api_key",
-    "model",
+    "provider",
     "max_entries",
     "default_ja_prompt",
     "default_nein_prompt",
     "default_vielleicht_prompt",
     "default_sonderregeln",
+    *[f"{key}_api_key" for key in PROVIDERS],
+    *[f"{key}_model" for key in PROVIDERS],
 )
 
 
@@ -257,7 +263,12 @@ def settings_form(request: Request, saved: int = 0):
     return templates.TemplateResponse(
         request,
         "settings.html",
-        {"active": "settings", "config": config, "saved": bool(saved)},
+        {
+            "active": "settings",
+            "config": config,
+            "providers": PROVIDERS,
+            "saved": bool(saved),
+        },
     )
 
 

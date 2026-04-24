@@ -7,12 +7,12 @@
   <p class="mt-1 text-sm text-muted-foreground">Vinted-Link einfügen, Regeln prüfen, los.</p>
 </header>
 
-{% if not has_api_key %}
+{% if not has_provider_key %}
 <div class="alert alert-destructive mb-6">
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-  <h2>Kein API-Key gesetzt</h2>
+  <h2>Kein API-Key für {{ provider_label }}</h2>
   <section>
-    <a href="/settings" class="underline">In den Einstellungen</a> einen OpenRouter-Key hinterlegen, sonst kann die Suche nicht klassifiziert werden.
+    <a href="/settings" class="underline">In den Einstellungen</a> einen Key hinterlegen oder einen anderen Provider wählen.
   </section>
 </div>
 {% endif %}
@@ -65,7 +65,7 @@
   </div>
 
   <div class="flex items-center justify-end gap-3">
-    <button type="submit" class="btn btn-primary" {% if not has_api_key %}disabled{% endif %}>
+    <button type="submit" class="btn btn-primary" {% if not has_provider_key %}disabled{% endif %}>
       Suche starten
     </button>
   </div>

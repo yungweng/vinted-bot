@@ -12,8 +12,11 @@ _initialized = False
 
 
 DEFAULT_CONFIG = {
-    "api_key": "",
-    "model": "anthropic/claude-haiku-4.5",
+    "provider": "openrouter",
+    "openrouter_api_key": "",
+    "openrouter_model": "anthropic/claude-haiku-4.5",
+    "anthropic_api_key": "",
+    "anthropic_model": "claude-haiku-4-5",
     "max_entries": "50",
     "default_ja_prompt": "",
     "default_nein_prompt": "",
@@ -29,8 +32,28 @@ def _read_prompt(name):
     return ""
 
 
+def _migrate_legacy_keys(con, existing):
+    """One-time migration from the single-provider schema (api_key, model)."""
+    legacy = {row[0]: row[1] for row in con.execute(
+        "SELECT key, value FROM app_config WHERE key IN ('api_key', 'model')"
+    )}
+    if "api_key" in legacy and "openrouter_api_key" not in existing:
+        con.execute(
+            "INSERT INTO app_config (key, value) VALUES ('openrouter_api_key', ?)",
+            (legacy["api_key"],),
+        )
+        existing.add("openrouter_api_key")
+    if "model" in legacy and "openrouter_model" not in existing:
+        con.execute(
+            "INSERT INTO app_config (key, value) VALUES ('openrouter_model', ?)",
+            (legacy["model"],),
+        )
+        existing.add("openrouter_model")
+
+
 def _seed_defaults(con):
     existing = {row[0] for row in con.execute("SELECT key FROM app_config")}
+    _migrate_legacy_keys(con, existing)
     seed = dict(DEFAULT_CONFIG)
     seed["default_ja_prompt"] = _read_prompt("ja")
     seed["default_nein_prompt"] = _read_prompt("nein")
