@@ -44,9 +44,28 @@ def _parse_response(raw):
     return "vielleicht", cleaned[:200]
 
 
-def classify(user_message, *, api_key, model, system_prompt, base_url):
+def _validate_api_key(api_key):
     if not api_key:
         raise RuntimeError("Kein API-Key hinterlegt. Bitte in den Einstellungen setzen.")
+    for i, c in enumerate(api_key):
+        if ord(c) > 127:
+            raise RuntimeError(
+                f"API-Key enthaelt Nicht-ASCII-Zeichen an Position {i}: "
+                f"{c!r} (U+{ord(c):04X}). Wahrscheinlich ein Copy-Paste-Fehler "
+                "mit typografischen Anfuehrungszeichen. Bitte in den "
+                "Einstellungen den Key leeren und direkt aus "
+                "openrouter.ai/keys bzw. console.anthropic.com neu einfuegen."
+            )
+    if len(api_key) > 400:
+        raise RuntimeError(
+            f"API-Key ist ungewoehnlich lang ({len(api_key)} Zeichen). "
+            "Wahrscheinlich wurde zu viel mitkopiert. In den Einstellungen "
+            "den Key leeren und nur den reinen Key einfuegen."
+        )
+
+
+def classify(user_message, *, api_key, model, system_prompt, base_url):
+    _validate_api_key(api_key)
     client_kwargs = {"base_url": base_url, "api_key": api_key}
     # OpenRouter uses these headers for public app ranking. Anthropic silently
     # ignores them, but some older SDK/httpx combos choke encoding custom
